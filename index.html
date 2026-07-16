@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Convertisseur KRW / EUR</title>
+    <title>Convertisseur ₩ / €</title>
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjRmNmg5Ii8+CiAgPHRleHQgeD0iOTAiIHk9IjEzMCIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEyMCIgZmlsbD0iIzAwNDdhMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4oKpPC90ZXh0Pgo8L3N2Zz4=">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjRmNmg5Ii8+CiAgPHRleHQgeD0iOTAiIHk9IjEzMCIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEyMCIgZmlsbD0iIzAwNDdhMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4oKpPC90ZXh0Pgo8L3N2Zz4=">
+
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -141,7 +145,7 @@
     <div class="section">
         <div class="section-title">💸 Utilisation</div>
         <div class="input-group">
-            <label for="krwInput">Prix en Wons (KRW)</label>
+            <label for="krwInput">Prix en Wons (₩)</label>
             <input type="number" id="krwInput" placeholder="Ex: 10000" inputmode="numeric">
         </div>
         <div class="result-box" id="eurResult">0.00 €</div>
@@ -156,7 +160,7 @@
         </div>
 
         <div class="input-group">
-            <label for="rateInput">Taux (1 KRW = ... EUR)</label>
+            <label for="rateInput">Taux (1 ₩ = ... €)</label>
             <input type="number" id="rateInput" step="0.00000001" placeholder="Ex: 0.00067">
         </div>
     </div>
@@ -169,41 +173,33 @@
     const fetchRateBtn = document.getElementById('fetchRateBtn');
     const apiStatus = document.getElementById('apiStatus');
 
-    // Charger les données sauvegardées ou mettre une valeur par défaut
     let currentRate = localStorage.getItem('savedRate') || 0.00067;
     rateInput.value = currentRate;
 
-    // Fonction de calcul de la conversion
     function convert() {
         const krw = parseFloat(krwInput.value) || 0;
         const rate = parseFloat(rateInput.value) || 0;
         const result = krw * rate;
-        
-        // Formatage en euros propre
         eurResult.textContent = result.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
     }
 
-    // Écouteurs pour mettre à jour en direct lors de la saisie
     krwInput.addEventListener('input', convert);
     rateInput.addEventListener('input', () => {
         localStorage.setItem('savedRate', rateInput.value);
         convert();
     });
 
-    // Fonction pour récupérer le taux réel
     async function fetchLiveRate() {
         apiStatus.textContent = "Mise à jour...";
         apiStatus.style.color = "orange";
         
         try {
-            // Utilisation de l'API publique Frankfurter (sans clé et rapide)
             const response = await fetch('https://api.frankfurter.dev/v1/latest?from=KRW&to=EUR');
             if (!response.ok) throw new Error();
             
             const data = await response.json();
             const liveRate = data.rates.EUR;
             
-            // Mise à jour de l'interface
             rateInput.value = liveRate;
             localStorage.setItem('savedRate', liveRate);
             
@@ -218,8 +214,6 @@
     }
 
     fetchRateBtn.addEventListener('click', fetchLiveRate);
-
-    // Lancer une recherche en temps réel automatique à l'ouverture (si connecté)
     fetchLiveRate();
 </script>
 
