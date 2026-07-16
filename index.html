@@ -1,4 +1,14 @@
-<style>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Convertisseur ₩ / €</title>
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjRmNmg5Ii8+CiAgPHRleHQgeD0iOTAiIHk9IjEzMCIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEyMCIgZmlsbD0iIzAwNDdhMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4oKpPC90ZXh0Pgo8L3N2Zz4=">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjRmNmg5Ii8+CiAgPHRleHQgeD0iOTAiIHk9IjEzMCIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEyMCIgZmlsbD0iIzAwNDdhMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4oKpPC90ZXh0Pgo8L3N2Zz4=">
+
+    <style>
         :root {
             --bg-color: #f7f9fa;       /* Gris très clair minimaliste coréen */
             --card-bg: #ffffff;        /* Blanc épuré */
@@ -137,3 +147,86 @@
             font-weight: 500;
         }
     </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h2>🇰🇷 Convertisseur KRW ➔ EUR 🇪🇺</h2>
+
+    <div class="section">
+        <div class="section-title">💸 Utilisation</div>
+        <div class="input-group">
+            <label for="krwInput">Prix en Wons (₩)</label>
+            <input type="number" id="krwInput" placeholder="Ex: 10000" inputmode="numeric">
+        </div>
+        <div class="result-box" id="eurResult">0.00 €</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">⚙️ Paramétrage</div>
+        
+        <div class="input-group" style="margin-bottom: 12px;">
+            <button class="btn" id="fetchRateBtn">🔄 Obtenir le taux en temps réel</button>
+            <div class="status" id="apiStatus">Prêt</div>
+        </div>
+
+        <div class="input-group">
+            <label for="rateInput">Taux (1 ₩ = ... €)</label>
+            <input type="number" id="rateInput" step="0.00000001" placeholder="Ex: 0.00067">
+        </div>
+    </div>
+</div>
+
+<script>
+    const krwInput = document.getElementById('krwInput');
+    const rateInput = document.getElementById('rateInput');
+    const eurResult = document.getElementById('eurResult');
+    const fetchRateBtn = document.getElementById('fetchRateBtn');
+    const apiStatus = document.getElementById('apiStatus');
+
+    let currentRate = localStorage.getItem('savedRate') || 0.00067;
+    rateInput.value = currentRate;
+
+    function convert() {
+        const krw = parseFloat(krwInput.value) || 0;
+        const rate = parseFloat(rateInput.value) || 0;
+        const result = krw * rate;
+        eurResult.textContent = result.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+    }
+
+    krwInput.addEventListener('input', convert);
+    rateInput.addEventListener('input', () => {
+        localStorage.setItem('savedRate', rateInput.value);
+        convert();
+    });
+
+    async function fetchLiveRate() {
+        apiStatus.textContent = "Mise à jour...";
+        apiStatus.style.color = "orange";
+        
+        try {
+            const response = await fetch('https://api.frankfurter.dev/v1/latest?from=KRW&to=EUR');
+            if (!response.ok) throw new Error();
+            
+            const data = await response.json();
+            const liveRate = data.rates.EUR;
+            
+            rateInput.value = liveRate;
+            localStorage.setItem('savedRate', liveRate);
+            
+            apiStatus.textContent = "Taux mis à jour avec succès !";
+            apiStatus.style.color = "green";
+            
+            convert();
+        } catch (error) {
+            apiStatus.textContent = "Erreur de connexion (mode manuel conservé)";
+            apiStatus.style.color = "red";
+        }
+    }
+
+    fetchRateBtn.addEventListener('click', fetchLiveRate);
+    fetchLiveRate();
+</script>
+
+</body>
+</html>
